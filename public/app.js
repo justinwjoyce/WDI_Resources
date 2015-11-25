@@ -26,6 +26,7 @@
               }]
           }
       });
+              
       $urlRouterProvider.otherwise('home');
   }])
 
@@ -96,6 +97,79 @@
       };
 
   }])
+
+.factory('auth', ['$http', '$window', function($http, $window){
+   var auth = {};
+      auth.saveToken = function (token){
+        $window.localStorage['flapper-news-token'] = token;
+      };
+
+      auth.getToken = function (){
+        return $window.localStorage['flapper-news-token'];
+      }
+      //return a boolean value for if the user is logged in.
+      auth.isLoggedIn = function(){
+        var token = auth.getToken();
+
+        if(token){
+          var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+          return payload.exp > Date.now() / 1000;
+        } else {
+          return false;
+        }
+      };
+      //The payload is the middle part of the token between the two .s. It's a JSON object that has been base64'd. Get it back to a stringified JSON by using $window.atob(), and then back to a javascript object with JSON.parse.
+      auth.currentUser = function(){
+        if(auth.isLoggedIn()){
+          var token = auth.getToken();
+          var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+          return payload.username;
+        }
+      };
+      // function that posts a user to /register route and saves the token returned.
+      auth.register = function(user){
+        return $http.post('/register', user).success(function(data){
+          auth.saveToken(data.token);
+        });
+      };
+      //function that posts a user to /login route and saves the token returned.
+      auth.logIn = function(user){
+        return $http.post('/login', user).success(function(data){
+          auth.saveToken(data.token);
+        });
+      };
+      auth.logOut = function(){
+        $window.localStorage.removeItem('flapper-news-token');
+      };
+
+  return auth;
+}])
+
+.controller('AuthCtrl', [
+'$scope',
+'$state',
+'auth',
+function($scope, $state, auth){
+  $scope.user = {};
+
+  $scope.register = function(){
+    auth.register($scope.user).error(function(error){
+      $scope.error = error;
+    }).then(function(){
+      $state.go('home');
+    });
+  };
+
+  $scope.logIn = function(){
+    auth.logIn($scope.user).error(function(error){
+      $scope.error = error;
+    }).then(function(){
+      $state.go('home');
+    });
+  };
+}])
 
 .factory('posts', ['$http', function ($http) {
       var o = {
