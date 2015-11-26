@@ -1,5 +1,5 @@
   (function () {
-  angular.module('flapperNews', ['ui.router'])
+  angular.module('justinNews', ['ui.router'])
   .config([
       '$stateProvider',
       '$urlRouterProvider',
