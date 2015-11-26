@@ -1,5 +1,5 @@
   (function () {
-  angular.module('flapperNews', ['ui.router'])
+  angular.module('justinNews', ['ui.router'])
   .config([
       '$stateProvider',
       '$urlRouterProvider',
@@ -23,9 +23,30 @@
                   resolve: {
                   post: ['$stateParams', 'posts', function ($stateParams, posts) {
                       return posts.get($stateParams.id);
-              }]
-          }
-      });
+                  }]
+                }
+              })
+              //specifying an onEnter function to the states. this gives the ability to detect if the user is authenticated before entering the state, which allows the app to redirect them back to the home state if they're already logged in.
+              .state('login', {
+                  url: '/login',
+                  templateUrl: '/login.html',
+                  controller: 'AuthCtrl',
+                  onEnter: ['$state', 'auth', function($state, auth){
+                    if(auth.isLoggedIn()){
+                      $state.go('home');
+                    }
+                  }]
+                })
+              .state('register', {
+                  url: '/register',
+                  templateUrl: '/register.html',
+                  controller: 'AuthCtrl',
+                  onEnter: ['$state', 'auth', function($state, auth){
+                    if(auth.isLoggedIn()){
+                      $state.go('home');
+                    }
+                  }]
+                });
               
       $urlRouterProvider.otherwise('home');
   }])
@@ -33,6 +54,7 @@
 .controller('MainCtrl', ['$scope', 'posts',
   function ($scope, posts) {
       $scope.posts = posts.posts;
+      // $scope.isLoggedIn = auth.isLoggedIn;
 
       //set title to blank to prevent empty posts
       $scope.title = '';
@@ -66,6 +88,10 @@
       $scope.downvote = function (post) {
         posts.downvote(post);
       };
+
+      $scope.incrementUpvotes = function(post) {
+        post.upvotes += 1;
+  };
   }])
 
 .controller('PostsCtrl', [
@@ -74,6 +100,7 @@
   'post',
   function ($scope, posts, post) {
       $scope.post = post;
+      // $scope.isLoggedIn = auth.isLoggedIn;
 
       $scope.addComment = function () {
           if ($scope.body === '') {
@@ -147,6 +174,15 @@
   return auth;
 }])
 
+.controller('NavCtrl', [
+'$scope',
+'auth',
+function($scope, auth){
+  $scope.isLoggedIn = auth.isLoggedIn;
+  $scope.currentUser = auth.currentUser;
+  $scope.logOut = auth.logOut;
+}])
+
 .controller('AuthCtrl', [
 '$scope',
 '$state',
@@ -171,7 +207,7 @@ function($scope, $state, auth){
   };
 }])
 
-.factory('posts', ['$http', function ($http) {
+.factory('posts', ['$http', 'auth', function ($http, auth) {
       var o = {
           posts: []
       };
@@ -185,26 +221,28 @@ function($scope, $state, auth){
       };
       // uses router.post in index.js to post a new Post model to mongoDB
       // when $http gets success, it adds this post to the posts object in local factory
-      o.create = function (post) {
-          return $http.post('/posts', post)
-            .success(function (data) {
-              o.posts.push(data);
-          });
+      o.create = function(post) {
+        return $http.post('/posts', post, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+          o.posts.push(data);
+        });
       };
 
-      o.upvote = function (post) {
-        //use express route for this post's id to add upvote to mongo model
-          return $http.put('/posts/' + post._id + '/upvote')
-                  .success(function (data) {
-                      post.votes += 1;
-                  });
+      o.upvote = function(post) {
+        return $http.put('/posts/' + post._id + '/upvote', null, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+          post.upvotes += 1;
+        });
       };
 
-      o.downvote = function (post) {
-        return $http.put('/posts/' + post._id + '/downvote')
-          .success(function(data) {
-            post.votes -= 1;
-          });
+      o.downvote = function(post) {
+        return $http.put('/posts/' + post._id + '/downvote', null, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+          post.upvotes += 1;
+        });
       };
 
       // grab a single post from server
@@ -215,22 +253,26 @@ function($scope, $state, auth){
           });
       };
 
-      o.addComment = function (id, comment) {
-          return $http.post('/posts/' + id + '/comments', comment);
+      o.addComment = function(id, comment) {
+        return $http.post('/posts/' + id + '/comments', comment, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        });
       };
 
-      o.upvoteComment = function (post, comment) {
-          return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/upvote')
-                  .success(function (data) {
-                      comment.votes += 1;
-                  });
+      o.upvoteComment = function(post, comment) {
+        return $http.put('/posts/' + post._id + '/comments/'+ comment._id + '/upvote', null, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+          comment.upvotes += 1;
+        });
       };
 
-      o.downvoteComment = function (post, comment) {
-        return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/downvote')
-          .success(function (data) {
-            comment.votes -= 1;
-          });
+      o.downvoteComment = function(post, comment) {
+        return $http.put('/posts/' + post._id + '/comments/'+ comment._id + '/downvote', null, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).success(function(data){
+          comment.upvotes += 1;
+        });
       };
       return o;
   }]);
