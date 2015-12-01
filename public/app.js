@@ -1,5 +1,5 @@
   (function () {
-  angular.module('justinNews', ['ui.router'])
+  angular.module('wdiResource', ['ui.router'])
   .config([
       '$stateProvider',
       '$urlRouterProvider',
