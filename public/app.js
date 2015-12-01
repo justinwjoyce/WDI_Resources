@@ -82,7 +82,7 @@
       };
 
       $scope.upvote = function (post) {
-          //we're calling the upvote() function and passing in our post
+          // calling the upvote() function and passing in post
           posts.upvote(post);
       };
       $scope.downvote = function (post) {
@@ -128,11 +128,11 @@
 .factory('auth', ['$http', '$window', function($http, $window){
    var auth = {};
       auth.saveToken = function (token){
-        $window.localStorage['flapper-news-token'] = token;
+        $window.localStorage['wdi-resource-token'] = token;
       };
 
       auth.getToken = function (){
-        return $window.localStorage['flapper-news-token'];
+        return $window.localStorage['wdi-resource-token'];
       }
       //return a boolean value for if the user is logged in.
       auth.isLoggedIn = function(){
@@ -168,7 +168,7 @@
         });
       };
       auth.logOut = function(){
-        $window.localStorage.removeItem('flapper-news-token');
+        $window.localStorage.removeItem('wdi-resource-token');
       };
 
   return auth;
