@@ -33,9 +33,10 @@
         <div ng-repeat="post in posts | orderBy: '-upvotes'">
             <span class="glyphicon glyphicon-thumbs-up"
                 ng-click="upvote(post)"></span>
-            {{post.votes}}
+            {{post.votes.length}}
             <span class="glyphicon glyphicon-thumbs-down"
                 ng-click="downvote(post)"></span>
+                  {{post.author}}
             <span style="font-size:20px;margin-left:10px">
                 <a ng-show="post.link" ng-href="{{post.link}}" target="_self">
                     {{post.title}}
@@ -51,6 +52,7 @@
         </div>
         <div class="col-xs-6 col-lg-4">
         <form ng-submit="addPost()"
+            ng-show="isLoggedIn()"
             style="margin-top:30px">
             <h3>Add a new resource:</h3>
 
@@ -71,6 +73,9 @@
             <button type="submit" class="btn btn-primary">Post</button>
             </div>
         </form>
+        <div ng-hide="isLoggedIn()">
+  <h3>You need to <a href="/#/login">Log In</a> or <a href="/#/register">Register</a> before you can add a post.</h3>
+</div>
     </script>
     <!-- end of /home template -->
     <!-- start of /register template -->
@@ -157,6 +162,7 @@
             </span>
         </div>
         <form ng-submit="addComment()"
+            ng-show="isLoggedIn()"
             style="margin-top:30px">
             <h3>Add a new comment</h3>
             <div class="form-group">
@@ -167,6 +173,9 @@
             </div>
             <button type="submit" class="btn btn-primary">Post to {{post.title}}</button>
         </form>
+        <div ng-hide="isLoggedIn()">
+  <h3>You need to <a href="/#/login">Log In</a> or <a href="/#/register">Register</a> before you can comment.</h3>
+</div>
     </script>
   </body>
 </html>

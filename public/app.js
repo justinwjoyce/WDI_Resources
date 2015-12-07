@@ -51,10 +51,10 @@
       $urlRouterProvider.otherwise('home');
   }])
 
-.controller('MainCtrl', ['$scope', 'posts',
-  function ($scope, posts) {
+.controller('MainCtrl', ['$scope', 'posts', 'auth',
+  function ($scope, posts, auth) {
       $scope.posts = posts.posts;
-      // $scope.isLoggedIn = auth.isLoggedIn;
+      $scope.isLoggedIn = auth.isLoggedIn;
 
       //set title to blank to prevent empty posts
       $scope.title = '';
@@ -98,9 +98,10 @@
   '$scope',
   'posts',
   'post',
-  function ($scope, posts, post) {
+  'auth',
+  function ($scope, posts, post, auth) {
       $scope.post = post;
-      // $scope.isLoggedIn = auth.isLoggedIn;
+      $scope.isLoggedIn = auth.isLoggedIn;
 
       $scope.addComment = function () {
           if ($scope.body === '') {
