@@ -1,5 +1,7 @@
 # WDI_Resources
 #### [WDI Resources Website!](https://enigmatic-plateau-5741.herokuapp.com/#/login)
+Post articles and tutorials that you find helpful in your quest to learn programming.
+"*Education is the kindling of a flame, not the filling of a vessel.*"-Socrates
 
 ### Technologies Used
 1. MEAN Stack
